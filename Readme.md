@@ -4,55 +4,55 @@
 
 \### Admin Home Page
 
-!\[Admin Home Page](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/admin%20home%20page.png?raw=true)
+!\[Admin Home Page](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/admin%20home%20page.png)
 
 
 
 \### Cart Controller
 
-!\[Cart Controller](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/cart%20controller.png?raw=true)
+!\[Cart Controller](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/cart%20controller.png)
 
 
 
 \### Checkout Controller
 
-!\[Checkout Controller](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/checkout%20controller.png?raw=true)
+!\[Checkout Controller](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/checkout%20controller.png)
 
 
 
 \### CRUD Admin
 
-!\[CRUD Admin](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/crud%20admin.png?raw=true)
+!\[CRUD Admin](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/crud%20admin.png)
 
 
 
 \### Database
 
-!\[Database](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/database.png?raw=true)
+!\[Database](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/database.png)
 
 
 
 \### Footer
 
-!\[Footer](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/footer.png?raw=true)
+!\[Footer](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/footer.png)
 
 
 
 \### List Product by Category
 
-!\[List Product by Category](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/list%20product%20by%20category.png?raw=true)
+!\[List Product by Category](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/list%20product%20by%20category.png)
 
 
 
 \### Login and Sign Up
 
-!\[Login and Sign Up](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/login%20and%20sign%20up.png?raw=true)
+!\[Login and Sign Up](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/login%20and%20sign%20up.png)
 
 
 
 \### Trang Chủ
 
-!\[Trang Chủ](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/trang%20chu.png?raw=true)
+!\[Trang Chủ](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme-vegana/trang%20chu.png)
 
 
 
