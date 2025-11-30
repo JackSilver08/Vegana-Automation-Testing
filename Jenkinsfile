@@ -41,3 +41,7 @@ pipeline {
                 archiveArtifacts artifacts: 'test-output/**/*', allowEmptyArchive: true
                 archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
                 archiveArtifacts artifact
+            }
+        }
+    }
+}
