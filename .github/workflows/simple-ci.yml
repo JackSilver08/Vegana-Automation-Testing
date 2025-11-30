@@ -13,6 +13,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_DATABASE: vegana_store
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -p123456"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -28,6 +42,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
+      
+      - name: Install MySQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+      
+      - name: Wait for MySQL
+        run: |
+          timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -uroot -p123456 --silent; do sleep 2; done'
+          echo "MySQL is ready!"
+      
+      - name: Setup MySQL Database
+        run: |
+          mysql -h 127.0.0.1 -uroot -p123456 -e "CREATE DATABASE IF NOT EXISTS vegana_store;"
+          if [ -f vegana.sql ]; then
+            mysql -h 127.0.0.1 -uroot -p123456 vegana_store < vegana.sql
+            echo "Database schema imported successfully"
+          else
+            echo "Warning: vegana.sql not found, skipping import"
+          fi
+        env:
+          MYSQL_PWD: 123456
       
       - name: Start Application
         run: |

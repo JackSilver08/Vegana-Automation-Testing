@@ -9,6 +9,11 @@ pipeline {
     environment {
         BASE_URL = 'http://localhost:8080'
         BROWSER = 'chrome'
+        DB_HOST = 'localhost'
+        DB_PORT = '3306'
+        DB_NAME = 'vegana_store'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = '123456'
     }
     
     stages {
@@ -23,6 +28,45 @@ pipeline {
             steps {
                 echo 'Building project...'
                 sh 'mvn clean compile'
+            }
+        }
+        
+        stage('Setup MySQL Database') {
+            steps {
+                echo 'Setting up MySQL database...'
+                sh '''
+                    # Kiểm tra MySQL connection
+                    mysql -u root -p123456 -e "SELECT 1;" || {
+                        echo "❌ Cannot connect to MySQL"
+                        echo "Please ensure:"
+                        echo "  - MySQL service is running"
+                        echo "  - Username: root"
+                        echo "  - Password: 123456"
+                        exit 1
+                    }
+                    
+                    # Tạo database nếu chưa có
+                    mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS vegana_store;" || {
+                        echo "❌ Failed to create database"
+                        exit 1
+                    }
+                    echo "✅ Database vegana_store created/verified"
+                    
+                    # Import schema nếu có file SQL
+                    if [ -f vegana.sql ]; then
+                        mysql -u root -p123456 vegana_store < vegana.sql
+                        echo "✅ Database schema imported successfully"
+                    else
+                        echo "⚠️ Warning: vegana.sql not found, skipping import"
+                    fi
+                    
+                    # Kiểm tra kết nối và tables
+                    mysql -u root -p123456 -e "USE vegana_store; SHOW TABLES;" || {
+                        echo "❌ Failed to verify database"
+                        exit 1
+                    }
+                    echo "✅ MySQL database setup completed"
+                '''
             }
         }
         

@@ -47,6 +47,7 @@ CI/CD pipeline tự động:
 **Tính năng:**
 - ✅ Chạy tests trên nhiều browsers (matrix strategy)
 - ✅ Cache Maven dependencies
+- ✅ Setup MySQL database tự động
 - ✅ Start Spring Boot app tự động
 - ✅ Archive test results và reports
 - ✅ Publish test results
@@ -75,6 +76,26 @@ CI/CD pipeline tự động:
 2. Thêm secrets nếu cần:
    - `SLACK_WEBHOOK` - Cho Slack notification
    - `EMAIL_PASSWORD` - Cho email notification
+
+#### Setup MySQL trong GitHub Actions
+
+Thêm MySQL service vào workflow:
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    env:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: vegana_store
+    ports:
+      - 3306:3306
+    options: >-
+      --health-cmd="mysqladmin ping"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=3
+```
 
 #### Customize Workflow
 
@@ -120,6 +141,29 @@ Vào **Manage Jenkins** → **Global Tool Configuration**:
 - **JDK**: Cài đặt JDK 17
 - **Maven**: Cài đặt Maven 3.8+
 
+#### 3.1. Setup MySQL Database
+
+**Yêu cầu:**
+- MySQL 8.0+ đã được cài đặt trên Jenkins server
+- Database `vegana_store` đã được tạo
+- Username: `root`
+- Password: `123456`
+
+**Tạo database (nếu chưa có):**
+```sql
+CREATE DATABASE IF NOT EXISTS vegana_store;
+```
+
+**Hoặc import từ file SQL:**
+```bash
+mysql -u root -p123456 < vegana.sql
+```
+
+**Kiểm tra kết nối:**
+```bash
+mysql -u root -p123456 -e "USE vegana_store; SHOW TABLES;"
+```
+
 #### 4. Tạo Pipeline Job
 
 1. **New Item** → Chọn **Pipeline**
@@ -134,6 +178,13 @@ Vào **Manage Jenkins** → **Global Tool Configuration**:
 ```groovy
 pipeline {
     agent any
+    environment {
+        DB_HOST = 'localhost'
+        DB_PORT = '3306'
+        DB_NAME = 'vegana_store'
+        DB_USERNAME = 'root'
+        DB_PASSWORD = '123456'
+    }
     stages {
         stage('Checkout') { ... }
         stage('Build') { ... }
@@ -188,6 +239,13 @@ BASE_URL=http://localhost:8080
 BROWSER=chrome
 TEST_USER_ID=testuser001
 TEST_USER_PASSWORD=123456
+
+# MySQL Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=vegana_store
+DB_USERNAME=root
+DB_PASSWORD=123456
 ```
 
 ### Test Configuration
@@ -209,7 +267,29 @@ base.url=http://localhost:8080
 browser=chrome
 implicit.wait=15
 page.load.timeout=60
+
+# Database settings
+db.host=localhost
+db.port=3306
+db.name=vegana_store
+db.username=root
+db.password=123456
 ```
+
+### MySQL Database Configuration
+
+**Thông tin kết nối:**
+- **Host**: `localhost`
+- **Port**: `3306`
+- **Database**: `vegana_store`
+- **Username**: `root`
+- **Password**: `123456`
+
+**Lưu ý:**
+- Đảm bảo MySQL đã được cài đặt và đang chạy
+- Database `vegana_store` đã được tạo
+- User `root` có quyền truy cập database
+- Import file `vegana.sql` để tạo schema và dữ liệu mẫu
 
 ---
 
@@ -222,12 +302,32 @@ page.load.timeout=60
 **Giải pháp:**
 - Tăng sleep time trong workflow
 - Kiểm tra port 8080 có bị chiếm không
+- Kiểm tra MySQL đã sẵn sàng chưa
 - Thêm health check endpoint
 
 ```yaml
+- name: Wait for MySQL
+  run: |
+    timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -uroot -p123456 --silent; do sleep 2; done'
+
 - name: Wait for application
   run: |
     timeout 60 bash -c 'until curl -f http://localhost:8080; do sleep 2; done'
+```
+
+#### Lỗi: "Cannot connect to MySQL"
+
+**Giải pháp:**
+- Kiểm tra MySQL service đã start chưa
+- Kiểm tra credentials (root/123456)
+- Kiểm tra database `vegana_store` đã tồn tại chưa
+- Kiểm tra port 3306 có bị chiếm không
+
+```yaml
+- name: Setup MySQL
+  run: |
+    mysql -u root -p123456 -e "CREATE DATABASE IF NOT EXISTS vegana_store;"
+    mysql -u root -p123456 vegana_store < vegana.sql
 ```
 
 #### Lỗi: "Chrome not found"
@@ -261,8 +361,18 @@ page.load.timeout=60
 
 **Giải pháp:**
 - Kiểm tra port conflicts
+- Kiểm tra MySQL connection
 - Thêm retry logic
 - Review application logs
+
+#### Lỗi: "Database connection failed"
+
+**Giải pháp:**
+- Kiểm tra MySQL service đang chạy: `sudo systemctl status mysql`
+- Kiểm tra credentials trong `PersistenceJPAConfig.java`
+- Kiểm tra database đã được tạo: `mysql -u root -p123456 -e "SHOW DATABASES;"`
+- Import schema: `mysql -u root -p123456 < vegana.sql`
+- Kiểm tra firewall rules cho port 3306
 
 ---
 
@@ -356,6 +466,9 @@ Thông báo khi tests fail:
 
 - [ ] GitHub Actions workflow đã setup
 - [ ] Jenkins pipeline đã setup (nếu dùng)
+- [ ] MySQL database đã được setup (root/123456)
+- [ ] Database `vegana_store` đã được tạo
+- [ ] Schema đã được import từ `vegana.sql`
 - [ ] Tests chạy thành công trên CI/CD
 - [ ] Reports được generate và archive
 - [ ] Notifications hoạt động
