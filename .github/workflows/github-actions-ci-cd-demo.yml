@@ -63,14 +63,24 @@ jobs:
       
       - name: Start Application
         run: |
-          mysql -h 127.0.0.1 -uroot -p123456 -e "DROP DATABASE IF EXISTS vegana_store;"
-          mysql -h 127.0.0.1 -uroot -p123456 -e "CREATE DATABASE vegana_store;"
+          mysql -h 127.0.0.1 -uroot -p123456 -e "DROP DATABASE IF EXISTS vegana_store;" 2>/dev/null || true
+          mysql -h 127.0.0.1 -uroot -p123456 -e "CREATE DATABASE vegana_store;" 2>/dev/null
           if [ -f vegana.sql ]; then
-            mysql -h 127.0.0.1 -uroot -p123456 vegana_store < vegana.sql
+            mysql -h 127.0.0.1 -uroot -p123456 vegana_store < vegana.sql 2>/dev/null
           fi
           mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=false -Dhibernate.hbm2ddl.auto=validate" > app.log 2>&1 &
-          sleep 40
-          curl -f http://localhost:8080 || exit 1
+          echo "Waiting for application to start..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8080 >/dev/null 2>&1; then
+              echo "Application started successfully!"
+              exit 0
+            fi
+            echo "Attempt $i/30: Application not ready yet, waiting..."
+            sleep 3
+          done
+          echo "Application failed to start. Last 50 lines of app.log:"
+          tail -50 app.log || true
+          exit 1
         env:
           MYSQL_PWD: 123456
       
