@@ -63,9 +63,16 @@ jobs:
       
       - name: Start Application
         run: |
+          mysql -h 127.0.0.1 -uroot -p123456 -e "DROP DATABASE IF EXISTS vegana_store;"
+          mysql -h 127.0.0.1 -uroot -p123456 -e "CREATE DATABASE vegana_store;"
+          if [ -f vegana.sql ]; then
+            mysql -h 127.0.0.1 -uroot -p123456 vegana_store < vegana.sql
+          fi
           mvn spring-boot:run > app.log 2>&1 &
           sleep 40
           curl -f http://localhost:8080 || exit 1
+        env:
+          MYSQL_PWD: 123456
       
       - name: Run Tests
         continue-on-error: true
