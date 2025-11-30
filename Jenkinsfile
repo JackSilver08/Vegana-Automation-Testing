@@ -24,21 +24,21 @@ pipeline {
             steps {
                 bat '''
                     echo Starting Spring Boot...
-                    start "" /B mvn spring-boot:run > app.log 2>&1
+                    start "vegana-app" /B mvn spring-boot:run > app.log 2>&1
 
-                    echo Waiting for Spring Boot to be ready...
+                    echo Waiting for app on 9090...
 
-                    REM === Loop 40 lần để check http://localhost:9090 ===
-                    for /l %%x in (1,1,40) do (
+                    for /l %%i in (1,1,40) do (
                         curl -s http://localhost:9090 >nul
-                        if %errorlevel%==0 (
-                            echo Spring Boot is UP!
-                            goto :done
+                        if !errorlevel! == 0 (
+                            echo App is ready!
+                            goto ready
                         )
-                        echo Waiting for app (%%x/40)...
+                        echo Waiting (%%i/40)...
                         ping -n 2 127.0.0.1 >nul
                     )
-                    :done
+
+                    :ready
                 '''
             }
         }
@@ -48,23 +48,17 @@ pipeline {
                 bat 'mvn test'
             }
         }
-
-        stage('Archive Reports') {
-            steps {
-                archiveArtifacts artifacts: 'test-output/**/*', allowEmptyArchive: true
-                archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
-                archiveArtifacts artifacts: 'app.log', allowEmptyArchive: true
-            }
-        }
     }
 
     post {
         always {
+            echo "Stopping Spring Boot..."
+
             bat '''
-                echo Stopping Spring Boot if running...
-                taskkill /F /IM java.exe >nul 2>&1
-                echo Done.
+                for /f "tokens=2" %%p in ('tasklist /v ^| findstr /i "vegana-app"') do taskkill /F /PID %%p
             '''
+
+            echo "Done."
         }
     }
 }
