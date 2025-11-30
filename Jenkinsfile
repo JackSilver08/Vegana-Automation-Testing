@@ -59,10 +59,17 @@ pipeline {
                 script {
                     sh '''
                         echo "Checking MySQL connection..."
-                        for i in {1..30}; do
-                            if docker exec mysql8 mysqladmin ping -h localhost -u${MYSQL_USER} -p${MYSQL_PASS} --silent 2>/dev/null; then
-                                echo "✅ MySQL is ready!"
-                                exit 0
+                        for i in $(seq 1 30); do
+                            # Try using netcat first (faster)
+                            if nc -z ${MYSQL_HOST} 3306 2>/dev/null; then
+                                # Then verify MySQL is actually ready
+                                export MYSQL_PWD=${MYSQL_PASS}
+                                if mysqladmin ping -h ${MYSQL_HOST} -u${MYSQL_USER} --silent 2>/dev/null; then
+                                    echo "✅ MySQL is ready!"
+                                    unset MYSQL_PWD
+                                    exit 0
+                                fi
+                                unset MYSQL_PWD
                             fi
                             echo "Waiting for MySQL ($i/30)..."
                             sleep 2
@@ -82,16 +89,18 @@ pipeline {
                 script {
                     sh '''
                         echo "Creating database if not exists..."
-                        docker exec -i mysql8 mysql -u${MYSQL_USER} -p${MYSQL_PASS} \
+                        export MYSQL_PWD=${MYSQL_PASS}
+                        mysql -h ${MYSQL_HOST} -u${MYSQL_USER} \
                             -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};" || true
 
                         if [ -f vegana.sql ]; then
                             echo "Importing DB schema..."
-                            docker exec -i mysql8 mysql -u${MYSQL_USER} -p${MYSQL_PASS} ${MYSQL_DATABASE} < vegana.sql
+                            mysql -h ${MYSQL_HOST} -u${MYSQL_USER} ${MYSQL_DATABASE} < vegana.sql
                             echo "✅ Schema imported!"
                         else
                             echo "⚠️ vegana.sql not found → skipping import"
                         fi
+                        unset MYSQL_PWD
                     '''
                 }
             }
