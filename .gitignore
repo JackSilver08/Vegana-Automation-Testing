@@ -45,7 +45,6 @@ logs/
 *.swp
 *~
 
-# Jenkins
-jenkins/jenkins_home/
+# Temporary files
 app.pid
 app.log
