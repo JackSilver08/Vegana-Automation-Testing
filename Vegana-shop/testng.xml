@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="Vegana Shop Automation Suite" parallel="false">
+
+    <test name="Login Tests" preserve-order="true">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="headless" value="false"/>
+
+        <classes>
+            <class name="tests.LoginTest">
+                <methods>
+                    <include name="testLoginPageElements"/>
+                    <include name="testLoginWithEmptyCredentials"/>
+                    <include name="testLoginWithInvalidCredentials"/>
+                    <include name="testLoginWithValidUserWrongPassword"/>
+                    <include name="testLoginWithValidCredentials"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

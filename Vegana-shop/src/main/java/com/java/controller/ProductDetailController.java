@@ -19,17 +19,30 @@ public class ProductDetailController extends CommonController {
 	ProductRepository productRepository;
 
 	// get productDetail
-	@GetMapping(value = "/productDetail")
-	public String productDetail(@RequestParam("productId") Integer productId, Model model) {
 
-		Product product = productRepository.findById(productId).orElse(null);
-		model.addAttribute("product", product);
-		productByCategory(model, product.getCategory().getCategoryId());
-		
-		listproduct10(model);
-		
-		return "site/productDetail";
-	}
+    @GetMapping("/productDetail")
+    public String productDetail(@RequestParam("productId") Integer productId, Model model) {
+
+        Product product = productRepository.findById(productId).orElse(null);
+
+        if (product == null) {
+            return "redirect:/not-found";
+        }
+
+        if (product.getCategory() == null) {
+            model.addAttribute("product", product);
+            model.addAttribute("productByCategory", List.of());
+            listproduct10(model);
+            return "site/productDetail";
+        }
+
+        model.addAttribute("product", product);
+
+        productByCategory(model, product.getCategory().getCategoryId());
+        listproduct10(model);
+
+        return "site/productDetail";
+    }
 
 	// Gợi ý sản phẩm cùng loại
 	public void productByCategory(Model model, Integer categoryId) {
